@@ -76,17 +76,20 @@ def add_song(driver, xpath, song, add):
     EC.presence_of_element_located((By.XPATH, xpath))
     )
     element.click()
-    element.clear()
     element.send_keys(song)
     driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
-    time.sleep(1.5)
+    time.sleep(1.2)
     add_button = WebDriverWait(driver, 12).until(
       EC.presence_of_element_located((By.CSS_SELECTOR, f'[data-testid="{add}"]'))
     )
     driver.execute_script("arguments[0].click();", add_button)
+    click_button_by_aria_label(driver, 'Clear search field')
+    time.sleep(0.4)
+    element.clear()
   except selenium.common.exceptions.ElementClickInterceptedException:
     print("Element click intercepted, trying JavaScript click")
     driver.execute_script("arguments[0].click();", element) 
+    element.clear()
 
 def login(driver):
   send_text_to_button_by_id(driver, 'login-username', text=os.getenv('USERNAME_SPOTIFY'))
@@ -142,8 +145,8 @@ def create_list_of_songs(mood: str, artists: str):
            You are a music dj that knows a lot about a wide variety of genres and up and coming artists. 
            Your task will be to receive a list of songs from various artists and from there, you will have to create a short and creative name for a playlist. 
            The more creative and in sync with the music you are given the better, you can use metaphors and other figures of speech to make the coolest name possible.
-           Finally, when you return the name, make sure to only return the name you created and nothing else. If you can roast the user with the title, do so.
-           example: Summery Vibes
+           Finally, when you return the name, make sure to only return the name you created and nothing else.
+           example: To cry in the club
            """},
           {
               "role": "user",
