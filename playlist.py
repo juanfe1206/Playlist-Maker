@@ -78,10 +78,15 @@ def add_song(driver, xpath, song, add):
     element.click()
     element.clear()
     element.send_keys(song)
-    time.sleep(1.3)
-    click_button_by_testid(driver, add)
-  except selenium.common.exceptions.TimeoutException:
-    print("button not found")
+    driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
+    time.sleep(1.5)
+    add_button = WebDriverWait(driver, 12).until(
+      EC.presence_of_element_located((By.CSS_SELECTOR, f'[data-testid="{add}"]'))
+    )
+    driver.execute_script("arguments[0].click();", add_button)
+  except selenium.common.exceptions.ElementClickInterceptedException:
+    print("Element click intercepted, trying JavaScript click")
+    driver.execute_script("arguments[0].click();", element) 
 
 def login(driver):
   send_text_to_button_by_id(driver, 'login-username', text=os.getenv('USERNAME_SPOTIFY'))
@@ -115,8 +120,9 @@ def create_list_of_songs(mood: str, artists: str):
            Your task will be to receive a mood or prompt from the user who will tell you what kind of music they want to hear and optionally a few artists as reference.
            Then, with this information your task is to only return a list of songs of size 15 and no additional text as follow. This is the most important task so make sure to do it correctly.
            Example: 'All too well (Taylor's version) - Taylor Swift, Song - Artist, song - Artist'
-           If no artists are given as reference, it is up to you to choose the songs and artists that fit the mood, it is specially good in this case to use popular artists and songs.
-           Adittionaly, since the list will be split using commas, make sure to avoid using them inside the names of the songs
+           If no artists are given as reference, it is up to you to choose the songs and artists that fit the mood, it is specially good in this case to use popular artists and songs. Be sure to only return the list.
+           Adittionaly, since the list will be split using commas, make sure to avoid using them inside the names of the songs.
+           
            """},
           {
               "role": "user",
@@ -155,8 +161,8 @@ def create_list_of_songs(mood: str, artists: str):
 
 #Load environment variables
 dotenv.load_dotenv()
-my_mood = input('What is your current mood?')
-the_artists = input('Give me a few artists as a base :)')
+my_mood = input('What is your current mood? ')
+the_artists = input('Give me a few artists as a base :) ')
 #Call openai api to create the 
 list_of_songs, my_playlist_name = create_list_of_songs(my_mood, artists=the_artists)
 print(list_of_songs)
@@ -171,7 +177,7 @@ create_playlist(driver, playlist_name=my_playlist_name)
 time.sleep(0.5)
 for song in list_of_songs:
   add_song(driver, '/html/body/div[5]/div/div[2]/div[4]/div[1]/div[2]/div[2]/div/main/section/div[2]/div[3]/div/section/div/div/input', song, 'add-to-playlist-button')
-  time.sleep(0.3)
+  time.sleep(0.1)
   
 time.sleep(1)
 #Start playing music
