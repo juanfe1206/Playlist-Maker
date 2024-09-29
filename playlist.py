@@ -155,15 +155,16 @@ def create_list_of_songs(mood: str, artists: str):
 
 #Load environment variables
 dotenv.load_dotenv()
-
+my_mood = input('What is your current mood?')
+the_artists = input('Give me a few artists as a base :)')
 #Call openai api to create the 
-list_of_songs, my_playlist_name = create_list_of_songs('Depressed', artists='Taylor Swift (Taylors Version)')
+list_of_songs, my_playlist_name = create_list_of_songs(my_mood, artists=the_artists)
 print(list_of_songs)
 
 #start selenium
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
 driver.get("https://accounts.spotify.com/en/login")
-
+driver.maximize_window()
 login(driver)
 time.sleep(1)
 create_playlist(driver, playlist_name=my_playlist_name)
